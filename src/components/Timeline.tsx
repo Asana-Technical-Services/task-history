@@ -90,7 +90,7 @@ function Timeline(props: TimelineProps) {
         {props.stories.map((story, dex) => {
           let storyDate = new Date(story?.created_at);
           return (
-            <div>
+            <div key={story.gid}>
               {dex === props.selectedIndex ? (
                 <SelectedStory>
                   <StoryUnit>

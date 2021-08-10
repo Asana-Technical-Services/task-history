@@ -1,7 +1,5 @@
 import axios from "axios";
 const cloneDeep = require("lodash/cloneDeep");
-//const taskId = "1200186779257471";
-
 const STORY_TYPES = [
   "due_date_changed",
   "assigned",
@@ -147,12 +145,11 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
 };
 
 const getOriginalTask = async (taskId: string) => {
-  const asanaKey = "1/1200462692993359:578614c19fd01b97a078f4199aa2ce2e";
   const ASANA_URL = "https://app.asana.com/api/1.0/";
 
   const client = axios.create({
     baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${asanaKey}` },
+    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
   });
 
   try {
@@ -172,7 +169,7 @@ const getAllStories = async (taskId: string): Promise<Array<any>> => {
 
   const client = axios.create({
     baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${asanaKey}` },
+    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
   });
 
   try {

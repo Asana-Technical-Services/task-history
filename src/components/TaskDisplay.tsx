@@ -1,5 +1,4 @@
-import { tasks } from "googleapis/build/src/apis/tasks";
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 import "../App.css";
 import styled from "styled-components";
 
@@ -61,7 +60,6 @@ interface TaskDisplayProps {
   backFunction: () => void;
 }
 function TaskDisplay(props: TaskDisplayProps) {
-  console.log(props.currentTaskData);
   return (
     <TaskDisplayContainer>
       <button onClick={props.backFunction}>{"< select another task"}</button>
@@ -89,7 +87,7 @@ function TaskDisplay(props: TaskDisplayProps) {
             {props.currentTaskData.memberships?.map(
               (membership: { project: any; section: any }) => {
                 return (
-                  <div>
+                  <div key={membership.project.gid}>
                     {membership.project.name + " : " + membership.section?.name}
                   </div>
                 );
@@ -98,7 +96,7 @@ function TaskDisplay(props: TaskDisplayProps) {
           </FieldValue>
         </FieldRow>
         {props.currentTaskData.custom_fields?.map((field: any) => (
-          <FieldRow>
+          <FieldRow key={field.name}>
             <FieldLabel>{field.name}</FieldLabel>
             <FieldValue>{field.display_value || "–"}</FieldValue>
           </FieldRow>

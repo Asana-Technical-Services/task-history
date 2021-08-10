@@ -14,6 +14,7 @@ interface TaskFormProps {
 function TaskForm(props: TaskFormProps) {
   const [taskIdInput, setTaskIdInput] = useState("");
 
+
   const handleSubmit = () => {
     props.setTaskId(taskIdInput);
   };
@@ -21,7 +22,7 @@ function TaskForm(props: TaskFormProps) {
   return (
     <TaskFormWrapper>
       <p>reference tasks: 1200538057511646 , 1200186779257471</p>
-      <h2>Input your task Id here:</h2>
+      <h2>Input your task Id:</h2>
       <input
         value={taskIdInput}
         onChange={(e) => setTaskIdInput(e.target.value)}

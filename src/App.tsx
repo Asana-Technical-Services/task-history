@@ -1,5 +1,3 @@
-import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import MainContainer from "./components/MainContainer";
 
@@ -9,9 +7,7 @@ function App() {
       <header className="App-header">
         <h2> Task History Tool </h2>
       </header>
-      <body>
-        <MainContainer />
-      </body>
+      <MainContainer />
     </div>
   );
 }
