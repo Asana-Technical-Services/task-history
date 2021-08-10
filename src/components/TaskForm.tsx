@@ -14,15 +14,24 @@ interface TaskFormProps {
 function TaskForm(props: TaskFormProps) {
   const [taskIdInput, setTaskIdInput] = useState("");
 
-
   const handleSubmit = () => {
-    props.setTaskId(taskIdInput);
+    let input = taskIdInput;
+    let finalInput = input;
+
+    let splitInputArray = input.split("/");
+
+    if (splitInputArray.length > 1) {
+      finalInput = splitInputArray[splitInputArray.length - 2];
+      console.log(splitInputArray);
+      console.log(finalInput);
+    }
+    props.setTaskId(finalInput);
   };
 
   return (
     <TaskFormWrapper>
       <p>reference tasks: 1200538057511646 , 1200186779257471</p>
-      <h2>Input your task Id:</h2>
+      <h2>Input your task Id, or a link to task:</h2>
       <input
         value={taskIdInput}
         onChange={(e) => setTaskIdInput(e.target.value)}

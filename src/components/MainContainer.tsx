@@ -14,7 +14,7 @@ const Container = styled.div`
 
 function MainContainer() {
   const [currentTaskId, setCurrentTaskId] = useState("");
-  const [taskHistory, setTaskHistory] = useState([{}]);
+  const [taskHistory, setTaskHistory] = useState(new Map());
   const [stories, setStories] = useState([{}]);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,7 @@ function MainContainer() {
       let newData = await getTaskHistory(id);
       console.log(newData);
 
-      if (newData?.taskHistory?.length && newData?.stories?.length) {
+      if (newData?.taskHistory && newData?.stories?.length) {
         setStories(newData.stories);
         setTaskHistory(newData.taskHistory);
         setCurrentTaskId(id);

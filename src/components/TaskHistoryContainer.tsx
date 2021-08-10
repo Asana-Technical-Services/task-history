@@ -13,18 +13,20 @@ const TaskHistoryWrapper = styled.div`
 interface TaskHistoryProps {
   setCurrentTaskId: (id: string) => void;
   stories: Array<any>;
-  taskHistory: Array<any>;
+  taskHistory: Map<string, any>;
 }
 
 function TaskHistoryContainer(props: TaskHistoryProps) {
-  const [currentTaskData, setCurrentTaskData] = useState(props.taskHistory[0]);
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [currentTaskData, setCurrentTaskData] = useState(
+    props.taskHistory.get("today")
+  );
+  const [currentStoryGid, setCurrentStoryGid] = useState("today");
   const [latestDate, setLatestDate] = useState("today");
 
-  const currentStoryIndexHandler = (newDex: number) => {
-    let newLatestDate = new Date(props.stories[newDex].created_at);
-    setCurrentStoryIndex(newDex);
-    setCurrentTaskData(props.taskHistory[newDex]);
+  const currentStoryGidHandler = (storyGid: string, latestDate: string) => {
+    let newLatestDate = new Date(latestDate);
+    setCurrentStoryGid(storyGid);
+    setCurrentTaskData(props.taskHistory.get(storyGid));
     setLatestDate(
       newLatestDate.toLocaleDateString("en-US", {
         year: "numeric",
@@ -45,8 +47,8 @@ function TaskHistoryContainer(props: TaskHistoryProps) {
         backFunction={backButtonHandler}
       />
       <Timeline
-        selectedIndex={currentStoryIndex}
-        selectNewIndex={currentStoryIndexHandler}
+        currentStoryGid={currentStoryGid}
+        selectNewStory={currentStoryGidHandler}
         stories={props.stories}
       />
     </TaskHistoryWrapper>

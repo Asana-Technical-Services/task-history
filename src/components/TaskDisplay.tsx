@@ -4,6 +4,8 @@ import styled from "styled-components";
 
 const TaskDisplayContainer = styled.div`
   flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 30%;
   margin: 2rem;
   text-align: left;
   overflow-y: scroll;

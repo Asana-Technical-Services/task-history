@@ -1,6 +1,7 @@
 import axios from "axios";
+import { nodeModuleNameResolver } from "typescript";
 const cloneDeep = require("lodash/cloneDeep");
-const STORY_TYPES = [
+export const STORY_TYPES = [
   "due_date_changed",
   "assigned",
   "added_to_project",
@@ -139,6 +140,24 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+  // } else if (stories[j].resource_subtype === "comment_added") {
+  //   let htmlText = stories[j].html_text;
+  //   let end;
+  //   const parser = new DOMParser();
+  //   const doc = parser.parseFromString(htmlText, "text/html");
+  //   const iterator = doc.evaluate(
+  //     '//a[@data-asana-type="user"]/@data-asana-gid',
+  //     doc,
+  //     null,
+  //     XPathResult.ORDERED_NODE_ITERATOR_TYPE
+  //   );
+  //   let node = iterator.iterateNext();
+  //   while (node) {
+  //     console.log(node.nodeValue);
+  //     end = end + (node.nodeValue || "");
+  //     node = iterator.iterateNext();
+  //   }
+
   }
 
   return newTask;
@@ -174,13 +193,11 @@ const getAllStories = async (taskId: string): Promise<Array<any>> => {
 
   try {
     const storyResponse = await client.get(
-      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name)`
+      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name),html_text`
     );
     let stories = storyResponse.data.data;
-    if (stories.filter) {
-      return stories.filter((task: any) =>
-        STORY_TYPES.includes(task.resource_subtype)
-      );
+    if (stories.length) {
+      return stories;
     } else {
       return [{}];
     }
@@ -193,12 +210,12 @@ const getAllStories = async (taskId: string): Promise<Array<any>> => {
 const taskHistoryFromStories = async (
   originalTask: any,
   stories: Array<any>
-): Promise<Array<any>> => {
+): Promise<Map<string, any>> => {
   let dateChangedCount = 0;
   let assigneeChangedCount = 0;
   let currentTask = originalTask;
-  let taskHistory = [];
-  taskHistory.push(currentTask);
+  let taskHistory: Map<string, any> = new Map();
+  taskHistory.set("today", currentTask);
   // let dateShift = { firstDate: null, lastDate: null };
   // dateShift.lastDate = Date.parse(currentTask.due_on);
   // taskHistory.push(currentTask);
@@ -208,13 +225,16 @@ const taskHistoryFromStories = async (
 
   //iterate backwards through stories
   for (let i = stories.length - 1; i >= 0; i--) {
-    if (stories[i].resource_subtype === "due_date_changed") {
-      dateChangedCount++;
-    } else if (stories[i].resource_subtype === "assigned") {
-      assigneeChangedCount++;
+    // if (stories[i].resource_subtype === "due_date_changed") {
+    //   dateChangedCount++;
+    // } else if (stories[i].resource_subtype === "assigned") {
+    //   assigneeChangedCount++;
+    // }
+    if (STORY_TYPES.includes(stories[i].resource_subtype)) {
+      taskHistory.set(stories[i].gid, currentTask);
+      currentTask = revertTask(i, stories, currentTask);
     }
-    currentTask = revertTask(i, stories, currentTask);
-    taskHistory.push(currentTask);
+    taskHistory.set("original", currentTask);
   }
 
   return taskHistory;
@@ -225,9 +245,7 @@ export const getTaskHistory = async (id: string) => {
   let stories = await getAllStories(id);
 
   const taskHistory = await taskHistoryFromStories(originalTask, stories);
-  console.log(stories[0]);
   stories.reverse();
-  console.log(stories[0]);
 
   return { stories, taskHistory };
 };
