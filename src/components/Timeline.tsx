@@ -15,12 +15,6 @@ const TimelineWrapper = styled.div`
   flex-direction: column;
 `;
 
-const Tickmark = styled.div`
-  text-align: left;
-  height: 0;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-`;
 
 const StoryUnit = styled.div`
   font-size: 14px;
@@ -108,6 +102,7 @@ function Timeline(props: TimelineProps) {
         {props.stories.map((story, dex) => {
           let storyDate = new Date(story?.created_at);
           if (STORY_TYPES.includes(story.resource_subtype)) {
+
             return (
               <div key={story.gid}>
                 {story.gid === props.currentStoryGid ? (
@@ -168,6 +163,8 @@ function Timeline(props: TimelineProps) {
                 </StoryDesc>
               </StoryUnit>
             );
+          } else {
+            return ""
           }
         })}
         <div key={"original"}>
