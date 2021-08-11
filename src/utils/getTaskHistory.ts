@@ -15,7 +15,85 @@ export const STORY_TYPES = [
   "multi_enum_custom_field_changed",
 ];
 
+export const getTaskHistory = async (id: string) => {
+  const originalTask = await getOriginalTask(id);
+  let stories = await getAllStories(id);
+
+  const taskHistory = await taskHistoryFromStories(originalTask, stories);
+  stories.reverse();
+
+  return { stories, taskHistory };
+};
+
+const taskHistoryFromStories = async (
+  originalTask: any,
+  stories: Array<any>
+): Promise<Map<string, any>> => {
+  let currentTask = originalTask;
+  let taskHistory: Map<string, any> = new Map();
+  taskHistory.set("today", currentTask);
+
+  //iterate backwards through stories
+  for (let i = stories.length - 1; i >= 0; i--) {
+    if (STORY_TYPES.includes(stories[i].resource_subtype)) {
+      taskHistory.set(stories[i].gid, currentTask);
+      currentTask = revertTask(i, stories, currentTask);
+    }
+
+    taskHistory.set("original", currentTask);
+  }
+
+  return taskHistory;
+};
+
+const getOriginalTask = async (taskId: string) => {
+  const ASANA_URL = "https://app.asana.com/api/1.0/";
+
+  const client = axios.create({
+    baseURL: ASANA_URL,
+    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
+  });
+
+  try {
+    const taskResponse = await client.get(
+      `tasks/${taskId}?opt_fields=name,assignee.(name|gid),projects,custom_fields,memberships.(project|section).(name|gid),due_on,due_at,start_on,start_at,notes`
+    );
+    console.log(taskResponse.data.data);
+    return taskResponse.data.data;
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+const getAllStories = async (taskId: string): Promise<Array<any>> => {
+  const ASANA_URL = "https://app.asana.com/api/1.0/";
+
+  const client = axios.create({
+    baseURL: ASANA_URL,
+    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
+  });
+
+  try {
+    const storyResponse = await client.get(
+      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name),html_text`
+    );
+    let stories = storyResponse.data.data;
+    if (stories.length) {
+      return stories;
+    } else {
+      return [{}];
+    }
+  } catch (err) {
+    console.log(err);
+    return [{}];
+  }
+};
+
 const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
+  // reverts the task. Different handlers for different story types, so this is a bit messy.
+  // TODO: further break down these functions:
+
   let j = i;
   let newTask = cloneDeep(currentTask);
   if (stories[j].resource_subtype === "assigned") {
@@ -140,112 +218,24 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
-  // } else if (stories[j].resource_subtype === "comment_added") {
-  //   let htmlText = stories[j].html_text;
-  //   let end;
-  //   const parser = new DOMParser();
-  //   const doc = parser.parseFromString(htmlText, "text/html");
-  //   const iterator = doc.evaluate(
-  //     '//a[@data-asana-type="user"]/@data-asana-gid',
-  //     doc,
-  //     null,
-  //     XPathResult.ORDERED_NODE_ITERATOR_TYPE
-  //   );
-  //   let node = iterator.iterateNext();
-  //   while (node) {
-  //     console.log(node.nodeValue);
-  //     end = end + (node.nodeValue || "");
-  //     node = iterator.iterateNext();
-  //   }
-
+    // } else if (stories[j].resource_subtype === "comment_added") {
+    //   let htmlText = stories[j].html_text;
+    //   let end;
+    //   const parser = new DOMParser();
+    //   const doc = parser.parseFromString(htmlText, "text/html");
+    //   const iterator = doc.evaluate(
+    //     '//a[@data-asana-type="user"]/@data-asana-gid',
+    //     doc,
+    //     null,
+    //     XPathResult.ORDERED_NODE_ITERATOR_TYPE
+    //   );
+    //   let node = iterator.iterateNext();
+    //   while (node) {
+    //     console.log(node.nodeValue);
+    //     end = end + (node.nodeValue || "");
+    //     node = iterator.iterateNext();
+    //   }
   }
 
   return newTask;
-};
-
-const getOriginalTask = async (taskId: string) => {
-  const ASANA_URL = "https://app.asana.com/api/1.0/";
-
-  const client = axios.create({
-    baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
-  });
-
-  try {
-    const taskResponse = await client.get(
-      `tasks/${taskId}?opt_fields=name,assignee.(name|gid),projects,custom_fields,memberships.(project|section).(name|gid),due_on,due_at,start_on,start_at,notes`
-    );
-    console.log(taskResponse.data.data);
-    return taskResponse.data.data;
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-};
-
-const getAllStories = async (taskId: string): Promise<Array<any>> => {
-  const ASANA_URL = "https://app.asana.com/api/1.0/";
-
-  const client = axios.create({
-    baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
-  });
-
-  try {
-    const storyResponse = await client.get(
-      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name),html_text`
-    );
-    let stories = storyResponse.data.data;
-    if (stories.length) {
-      return stories;
-    } else {
-      return [{}];
-    }
-  } catch (err) {
-    console.log(err);
-    return [{}];
-  }
-};
-
-const taskHistoryFromStories = async (
-  originalTask: any,
-  stories: Array<any>
-): Promise<Map<string, any>> => {
-  let dateChangedCount = 0;
-  let assigneeChangedCount = 0;
-  let currentTask = originalTask;
-  let taskHistory: Map<string, any> = new Map();
-  taskHistory.set("today", currentTask);
-  // let dateShift = { firstDate: null, lastDate: null };
-  // dateShift.lastDate = Date.parse(currentTask.due_on);
-  // taskHistory.push(currentTask);
-  // console.log("\n\n task currently has:");
-  // console.log("due date: ", currentTask.due_on);
-  // console.log("and assignee: ", currentTask.assignee.name, "\n\n");
-
-  //iterate backwards through stories
-  for (let i = stories.length - 1; i >= 0; i--) {
-    // if (stories[i].resource_subtype === "due_date_changed") {
-    //   dateChangedCount++;
-    // } else if (stories[i].resource_subtype === "assigned") {
-    //   assigneeChangedCount++;
-    // }
-    if (STORY_TYPES.includes(stories[i].resource_subtype)) {
-      taskHistory.set(stories[i].gid, currentTask);
-      currentTask = revertTask(i, stories, currentTask);
-    }
-    taskHistory.set("original", currentTask);
-  }
-
-  return taskHistory;
-};
-
-export const getTaskHistory = async (id: string) => {
-  const originalTask = await getOriginalTask(id);
-  let stories = await getAllStories(id);
-
-  const taskHistory = await taskHistoryFromStories(originalTask, stories);
-  stories.reverse();
-
-  return { stories, taskHistory };
 };

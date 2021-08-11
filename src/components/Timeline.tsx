@@ -80,6 +80,8 @@ interface TimelineProps {
   stories: Array<any>;
 }
 
+//TODO: break this down a little further into separate, better defined components
+
 function Timeline(props: TimelineProps) {
   const [showComments, setShowComments] = useState(false);
 
