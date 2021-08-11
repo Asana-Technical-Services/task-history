@@ -15,6 +15,7 @@ function TaskForm(props: TaskFormProps) {
   const [taskIdInput, setTaskIdInput] = useState("");
 
   const handleSubmit = () => {
+    // TODO: validate and parse input more intelligently, handle errors gracefully.
     let input = taskIdInput;
     let finalInput = input;
 

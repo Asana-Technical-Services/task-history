@@ -15,20 +15,23 @@ export const STORY_TYPES = [
 ];
 
 export const getTaskHistory = async (id: string) => {
-  const originalTask = await getOriginalTask(id);
+  const task = await getTask(id);
   let stories = await getAllStories(id);
 
-  const taskHistory = await taskHistoryFromStories(originalTask, stories);
+  const taskHistory = await taskHistoryFromStories(task, stories);
   stories.reverse();
 
   return { stories, taskHistory };
 };
 
 const taskHistoryFromStories = async (
-  originalTask: any,
+  task: any,
   stories: Array<any>
 ): Promise<Map<string, any>> => {
-  let currentTask = originalTask;
+  let currentTask = task;
+
+  // create a map of story Gid to a task state after that story action
+  // two special states, "today" being the latest and "original" being the first
   let taskHistory: Map<string, any> = new Map();
   taskHistory.set("today", currentTask);
 
@@ -45,7 +48,7 @@ const taskHistoryFromStories = async (
   return taskHistory;
 };
 
-const getOriginalTask = async (taskId: string) => {
+const getTask = async (taskId: string) => {
   const ASANA_URL = "https://app.asana.com/api/1.0/";
 
   const client = axios.create({
@@ -90,11 +93,18 @@ const getAllStories = async (taskId: string): Promise<Array<any>> => {
 };
 
 const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
-  // reverts the task. Different handlers for different story types, so this is a bit messy.
-  // TODO: further break down these functions:
+  // reverts the task. Different handlers for different story types.
+  // TODO: further break down these to separate functions:
 
   let j = i;
+
+  // duplicate the task object so we don't modify the original object
   let newTask = cloneDeep(currentTask);
+
+  // story type handlers:
+  // TODO: add completion or approval status, dependencies
+
+  //#################### Assigned ####################
   if (stories[j].resource_subtype === "assigned") {
     console.log(j, i, stories[j]);
     j--;
@@ -104,30 +114,29 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
     }
     console.log(j, i);
     if (j < 0) {
-      console.log("this one");
       newTask.assignee = { gid: "", name: "unassigned" };
       console.log(newTask.assignee);
     } else {
-      console.log("second one");
       newTask.assignee = stories[j].assignee;
       console.log(newTask.assignee);
     }
+
+    // #################### Date Change ####################
   } else if (stories[j].resource_subtype === "due_date_changed") {
     newTask.due_on = stories[j].old_dates?.due_on;
     newTask.due_at = stories[j].old_dates?.due_at;
     newTask.start_on = stories[j].old_dates?.start_on;
     newTask.start_at = stories[j].old_dates?.start_at;
+
+    // #################### Added to project  ####################
   } else if (stories[j].resource_subtype === "added_to_project") {
-    console.log("added to a project");
-    console.log("before");
-    console.log(String(newTask.projects));
-    console.log(String(newTask.memberships));
     for (let k = 0; k < newTask.projects.length; k++) {
       if (newTask.projects[k].gid === stories[j].project.gid) {
         newTask.projects.splice(k, 1);
         break;
       }
     }
+
     for (let k = 0; k < newTask.memberships.length; k++) {
       console.log(newTask.memberships[k].project?.gid);
       console.log(stories[j].project.gid);
@@ -136,9 +145,7 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
-    console.log("after");
-    console.log(String(newTask.projects));
-    console.log(String(newTask.memberships));
+    // #################### Removed from project ####################
   } else if (stories[j].resource_subtype === "removed_from_project") {
     newTask.projects.push(stories[j].project);
     let oldSection = {};
@@ -152,16 +159,21 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
           name: stories[k].new_section?.name,
           gid: stories[k].new_section?.gid,
         };
+        break;
       }
     }
     newTask.memberships.push({
       project: stories[j].project,
       section: oldSection,
     });
+    // #################### Notes ####################
   } else if (stories[j].resource_subtype === "notes_changed") {
     newTask.notes = stories[j].old_value;
+    // #################### Name ####################
   } else if (stories[j].resource_subtype === "name_changed") {
     newTask.name = stories[j].old_name;
+
+    // #################### Section ####################
   } else if (stories[j].resource_subtype === "section_changed") {
     for (let k = 0; k < newTask.memberships.length; k++) {
       if (
@@ -175,6 +187,8 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+
+    // #################### CF - ENUM  ####################
   } else if (stories[j].resource_subtype === "enum_custom_field_changed") {
     for (let k = 0; k < newTask.custom_fields.length; k++) {
       if (newTask.custom_fields[k].gid === stories[j].custom_field.gid) {
@@ -184,6 +198,7 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+    // #################### CF - NUMBER ####################
   } else if (stories[j].resource_subtype === "number_custom_field_changed") {
     for (let k = 0; k < newTask.custom_fields.length; k++) {
       if (newTask.custom_fields[k].gid === stories[j].custom_field.gid) {
@@ -194,6 +209,7 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+    // #################### CF - TEXT ####################
   } else if (stories[j].resource_subtype === "text_custom_field_changed") {
     for (let k = 0; k < newTask.custom_fields.length; k++) {
       if (newTask.custom_fields[k].gid === stories[j].custom_field.gid) {
@@ -202,6 +218,8 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+
+    // #################### CF MULTI-ENUM ####################
   } else if (
     stories[j].resource_subtype === "multi_enum_custom_field_changed"
   ) {
@@ -217,6 +235,9 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
         break;
       }
     }
+
+    // ### TODO: Parse rich text comments
+
     // } else if (stories[j].resource_subtype === "comment_added") {
     //   let htmlText = stories[j].html_text;
     //   let end;
