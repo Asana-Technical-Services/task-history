@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../App.css";
 import styled from "styled-components";
 import { getTaskHistory } from "../utils/getTaskHistory";
@@ -12,11 +12,30 @@ const Container = styled.div`
   height: 85vh;
 `;
 
-function MainContainer() {
+interface MainContainerProps { 
+  query:any
+}
+
+function MainContainer(props:MainContainerProps) {
   const [currentTaskId, setCurrentTaskId] = useState("");
   const [taskHistory, setTaskHistory] = useState(new Map());
   const [stories, setStories] = useState([{}]);
   const [loading, setLoading] = useState(false);
+  const [token,setToken] = useState("");
+  const [code,setCode] = useState("");
+
+
+
+  useEffect(()=>{
+    if(props.query?.code){
+      // ok
+      setCode(props.query.code)
+      let baseURL = process.env.API_URL
+      //axios request
+      let currentSite =  window.location.baseUrl
+
+    }
+  },[props])
 
   const handleTaskIdChange = async (id: string) => {
     if (id === "") {

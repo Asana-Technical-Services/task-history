@@ -19,7 +19,6 @@ export const getTaskHistory = async (id: string) => {
   let stories = await getAllStories(id);
 
   const taskHistory = await taskHistoryFromStories(task, stories);
-  stories.reverse();
 
   return { stories, taskHistory };
 };
@@ -58,7 +57,7 @@ const getTask = async (taskId: string) => {
 
   try {
     const taskResponse = await client.get(
-      `tasks/${taskId}?opt_fields=name,assignee.(name|gid),projects,custom_fields,memberships.(project|section).(name|gid),due_on,due_at,start_on,start_at,notes`
+      `tasks/${taskId}?opt_fields=name,assignee.(name|gid),projects,custom_fields,memberships.(project|section).(name|gid),due_on,due_at,start_on,start_at,notes,resource_subtype,completed,approval_status`
     );
     console.log(taskResponse.data.data);
     return taskResponse.data.data;
@@ -78,7 +77,7 @@ const getAllStories = async (taskId: string): Promise<Array<any>> => {
 
   try {
     const storyResponse = await client.get(
-      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name),html_text`
+      `tasks/${taskId}/stories?opt_fields=project.(name|color),custom_field,created_at,created_by.name,resource_subtype,old_resource_subtype,new_resource_subtype,type,text,new_value,old_value,new_text_value,old_text_value,old_number_value,new_number_value,old_name,new_name,old_enum_value,,new_enum_value,old_multi_enum_values,new_multi_enum_values,old_dates,new_dates,old_approval_status,new_approval_status,old_section.(name|project),new_section.(name|project),created_by,assignee.(gid|name),html_text`
     );
     let stories = storyResponse.data.data;
     if (stories.length) {
@@ -102,10 +101,27 @@ const revertTask = (i: number, stories: Array<any>, currentTask: any) => {
   let newTask = cloneDeep(currentTask);
 
   // story type handlers:
-  // TODO: add completion or approval status, dependencies
+  // TODO: track dependencies
 
-  //#################### Assigned ####################
-  if (stories[j].resource_subtype === "assigned") {
+  //#################### change completion status ####################
+  if (
+    ["changes_requested", "approved", "rejected"].includes(
+      stories[j].resource_subtype
+    )
+  ) {
+    newTask.approval_status = stories[j].old_approval_status || "pending";
+  } else if (stories[j].resource_subtype === "marked_complete") {
+    newTask.completed = false;
+  } else if (stories[j].resource_subtype === "marked_incomplete") {
+    newTask.completed = true;
+    //#################### changed between different resource subtypes (milestone, approval, etc) ####################
+  } else if (stories[j].resource_subtype === "resource_subtype_changed") {
+    //  resource subtype:
+
+    newTask.resource_subtype = stories[j].old_resource_subtype;
+
+    //#################### Assigned ####################
+  } else if (stories[j].resource_subtype === "assigned") {
     console.log(j, i, stories[j]);
     j--;
     console.log(j, i, stories[j]);

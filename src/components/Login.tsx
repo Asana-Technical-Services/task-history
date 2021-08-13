@@ -1,6 +1,10 @@
 export function Login() {
   const redirect = () => {
-    window.location.href = "redirecturl";
+    let redirectUrl = process.env.ASANA_AUTH_URL
+    le
+    if (redirectUrl){
+      window.location.href = redirectUrl;
+    }
   };
   return (
     <div>
