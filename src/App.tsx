@@ -1,4 +1,5 @@
 import "./App.css";
+import { Login } from "./components/Login";
 import MainContainer from "./components/MainContainer";
 
 function App() {
@@ -7,7 +8,7 @@ function App() {
       <header className="App-header">
         <h2> Task History Tool </h2>
       </header>
-      <MainContainer />
+      <Login />
     </div>
   );
 }
