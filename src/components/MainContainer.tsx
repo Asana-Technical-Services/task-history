@@ -27,9 +27,6 @@ export function MainContainer() {
       setCurrentTaskId("");
     } else {
       setLoading(true);
-      console.log("session");
-      console.log(session);
-      console.log(sessionLoading);
       if (typeof session?.accessToken === "string") {
         let newData = await getTaskHistory(id, session.accessToken);
         if (newData?.taskHistory && newData?.stories?.length) {

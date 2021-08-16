@@ -18,9 +18,6 @@ export default NextAuth({
         "https://app.asana.com/-/oauth_authorize?response_type=code",
       profileUrl: "https://app.asana.com/api/1.0/users/me",
       async profile(profile, tokens) {
-        console.log(tokens);
-        console.log(profile);
-
         // You can use the tokens, in case you want to fetch more profile information
         // For example several OAuth providers do not return email by default.
         // Depending on your provider, will have tokens like `access_token`, `id_token` and or `refresh_token`
@@ -29,7 +26,7 @@ export default NextAuth({
           id: profile.data.gid,
           name: profile.data?.name,
           email: profile.data?.email,
-          image: profile.data?.photo?.image_128x128,
+          image: profile.data?.photo?.image_å128x128,
         };
       },
       async session(session, token) {

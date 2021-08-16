@@ -3,17 +3,13 @@ import { signIn, signOut, useSession } from "next-auth/client";
 
 export function Login() {
   const [session, loading] = useSession();
-  
-  useEffect(() => {
-    console.log(session);
-  }, [session]);
 
   return (
     <div>
       {!session && (
         <div>
           Not signed in <br />
-          <button onClick={() => signIn()}>Sign in</button>
+          <button onClick={() => signIn()}>Connect to Asana</button>
         </div>
       )}
       {session && (
