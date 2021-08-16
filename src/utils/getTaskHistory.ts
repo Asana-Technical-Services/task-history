@@ -14,9 +14,9 @@ export const STORY_TYPES = [
   "multi_enum_custom_field_changed",
 ];
 
-export const getTaskHistory = async (id: string) => {
-  const task = await getTask(id);
-  let stories = await getAllStories(id);
+export const getTaskHistory = async (id: string, accessToken: string) => {
+  const task = await getTask(id, accessToken);
+  let stories = await getAllStories(id, accessToken);
 
   const taskHistory = await taskHistoryFromStories(task, stories);
 
@@ -47,12 +47,12 @@ const taskHistoryFromStories = async (
   return taskHistory;
 };
 
-const getTask = async (taskId: string) => {
+const getTask = async (taskId: string, accessToken: string) => {
   const ASANA_URL = "https://app.asana.com/api/1.0/";
 
   const client = axios.create({
     baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   try {
@@ -67,12 +67,15 @@ const getTask = async (taskId: string) => {
   }
 };
 
-const getAllStories = async (taskId: string): Promise<Array<any>> => {
+const getAllStories = async (
+  taskId: string,
+  accessToken: string
+): Promise<Array<any>> => {
   const ASANA_URL = "https://app.asana.com/api/1.0/";
 
   const client = axios.create({
     baseURL: ASANA_URL,
-    headers: { Authorization: `Bearer ${process.env.REACT_APP_ASANA_KEY}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   try {

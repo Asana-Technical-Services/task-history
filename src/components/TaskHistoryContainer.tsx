@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../App.css";
 import TaskDisplay from "./TaskDisplay";
 import Timeline from "./Timeline";
 import styled from "styled-components";
