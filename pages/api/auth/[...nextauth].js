@@ -27,9 +27,9 @@ export default NextAuth({
 
         return {
           id: profile.data.gid,
-          name: profile.data.name,
-          email: profile.data.email,
-          image: profile.data.photo.image_128x128,
+          name: profile.data?.name,
+          email: profile.data?.email,
+          image: profile.data?.photo?.image_128x128,
         };
       },
       async session(session, token) {
