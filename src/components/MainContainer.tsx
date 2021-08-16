@@ -30,17 +30,18 @@ export function MainContainer() {
       console.log("session");
       console.log(session);
       console.log(sessionLoading);
-      let newData = await getTaskHistory(id, session.accessToken);
-      console.log(newData);
-
-      if (newData?.taskHistory && newData?.stories?.length) {
-        setStories(newData.stories);
-        setTaskHistory(newData.taskHistory);
-        setCurrentTaskId(id);
-      } else {
-        setCurrentTaskId("");
-      }
-      setLoading(false);
+      if (typeof session?.accessToken === "string") {
+        let newData = await getTaskHistory(id, session.accessToken);
+        if (newData?.taskHistory && newData?.stories?.length) {
+          setStories(newData.stories);
+          setTaskHistory(newData.taskHistory);
+          setCurrentTaskId(id);
+          setLoading(false);
+        } else {
+          setCurrentTaskId("");
+          setLoading(false);
+        }
+      } else setLoading(false);
     }
   };
 
