@@ -46,21 +46,21 @@ export function MainContainer() {
 
   return (
     <Container>
-      {!session && <Login />}
-      {session && (currentTaskId === "" ? (
-            loading ? (
-              <div>Loading...</div>
-            ) : (
-              <TaskForm setTaskId={handleTaskIdChange} />
-            )
+      <Login />
+      {session &&
+        (currentTaskId === "" ? (
+          loading ? (
+            <div>Loading...</div>
           ) : (
-            <TaskHistoryContainer
-              setCurrentTaskId={handleTaskIdChange}
-              taskHistory={taskHistory}
-              stories={stories}
-            />
-          ))
-      }
+            <TaskForm setTaskId={handleTaskIdChange} />
+          )
+        ) : (
+          <TaskHistoryContainer
+            setCurrentTaskId={handleTaskIdChange}
+            taskHistory={taskHistory}
+            stories={stories}
+          />
+        ))}
     </Container>
   );
 }
