@@ -1,57 +1,64 @@
-import { useState } from "react";
-import "../App.css";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { getTaskHistory } from "../utils/getTaskHistory";
 import TaskForm from "./TaskForm";
 import TaskHistoryContainer from "./TaskHistoryContainer";
+import { useSession } from "next-auth/client";
+import { Login } from "./Login";
 
 const Container = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Helvetica, Arial, sans-serif;
   display: relative;
-  height: 85vh;
+  height: 100vh;
+  width: 100vw;
 `;
 
-function MainContainer() {
+export function MainContainer() {
   const [currentTaskId, setCurrentTaskId] = useState("");
   const [taskHistory, setTaskHistory] = useState(new Map());
   const [stories, setStories] = useState([{}]);
   const [loading, setLoading] = useState(false);
+  const [session, sessionLoading] = useSession();
+  const [code, setCode] = useState("");
 
   const handleTaskIdChange = async (id: string) => {
     if (id === "") {
       setCurrentTaskId("");
     } else {
       setLoading(true);
-      let newData = await getTaskHistory(id);
-      console.log(newData);
-
-      if (newData?.taskHistory && newData?.stories?.length) {
-        setStories(newData.stories);
-        setTaskHistory(newData.taskHistory);
-        setCurrentTaskId(id);
-      } else {
-        setCurrentTaskId("");
-      }
-      setLoading(false);
+      if (typeof session?.accessToken === "string") {
+        let newData = await getTaskHistory(id, session.accessToken);
+        if (newData?.taskHistory && newData?.stories?.length) {
+          setStories(newData.stories);
+          setTaskHistory(newData.taskHistory);
+          setCurrentTaskId(id);
+          setLoading(false);
+        } else {
+          setCurrentTaskId("");
+          setLoading(false);
+        }
+      } else setLoading(false);
     }
   };
 
   return (
     <Container>
-      {currentTaskId === "" ? (
-        loading ? (
-          <div>Loading...</div>
+      <Login />
+      {session &&
+        (currentTaskId === "" ? (
+          loading ? (
+            <div>Loading...</div>
+          ) : (
+            <TaskForm setTaskId={handleTaskIdChange} />
+          )
         ) : (
-          <TaskForm setTaskId={handleTaskIdChange} />
-        )
-      ) : (
-        <TaskHistoryContainer
-          setCurrentTaskId={handleTaskIdChange}
-          taskHistory={taskHistory}
-          stories={stories}
-        />
-      )}
+          <TaskHistoryContainer
+            setCurrentTaskId={handleTaskIdChange}
+            taskHistory={taskHistory}
+            stories={stories}
+          />
+        ))}
     </Container>
   );
 }
