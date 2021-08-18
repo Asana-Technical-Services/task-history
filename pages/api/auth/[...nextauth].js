@@ -26,18 +26,16 @@ export default NextAuth({
           id: profile.data.gid,
           name: profile.data?.name,
           email: profile.data?.email,
-          image: profile.data?.photo?.image_å128x128,
+          image: profile.data?.photo?.image_128x128,
         };
       },
-      async session(session, token) {
-        // Add property to session, like an access_token from a provider.
-        session.accessToken = token.accessToken;
-        return session;
-      },
-      clientId: "1200754514360823",
-      clientSecret: process.env.NEXT_SECRET,
+      clientId: process.env.NEXT_CLIENT_ID,
+      clientSecret: process.env.NEXT_CLIENT_SECRET,
     },
   ],
+  pages: {
+    signIn: "/signin",
+  },
   callbacks: {
     /**
      * @param  {object}  token     Decrypted JSON Web Token
@@ -64,7 +62,7 @@ export default NextAuth({
      */
 
     async session(session, token) {
-      // Add property to session, like an access_token from a provider.
+      // Add access_token to session
       session.accessToken = token.accessToken;
       return session;
     },

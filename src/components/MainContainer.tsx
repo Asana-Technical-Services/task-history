@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import styled from "styled-components";
 import { getTaskHistory } from "../utils/getTaskHistory";
 import TaskForm from "./TaskForm";
@@ -15,12 +16,19 @@ const Container = styled.div`
 `;
 
 export function MainContainer() {
+  const router = useRouter();
   const [currentTaskId, setCurrentTaskId] = useState("");
   const [taskHistory, setTaskHistory] = useState(new Map());
   const [stories, setStories] = useState([{}]);
   const [loading, setLoading] = useState(false);
   const [session, sessionLoading] = useSession();
   const [code, setCode] = useState("");
+
+  useEffect(() => {
+    if (!session) {
+      router.replace("/signin");
+    }
+  }, [session]);
 
   const handleTaskIdChange = async (id: string) => {
     if (id === "") {
