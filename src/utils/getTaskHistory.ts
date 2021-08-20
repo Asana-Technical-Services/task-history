@@ -15,12 +15,15 @@ export const STORY_TYPES = [
 ];
 
 export const getTaskHistory = async (id: string, accessToken: string) => {
-  const task = await getTask(id, accessToken);
-  let stories = await getAllStories(id, accessToken);
+  try {
+    const task = await getTask(id, accessToken);
+    let stories = await getAllStories(id, accessToken);
+    const taskHistory = await taskHistoryFromStories(task, stories);
 
-  const taskHistory = await taskHistoryFromStories(task, stories);
-
-  return { stories, taskHistory };
+    return { stories, taskHistory };
+  } catch (err) {
+    return { stories: [], taskHistory: new Map() };
+  }
 };
 
 const taskHistoryFromStories = async (

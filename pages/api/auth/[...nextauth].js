@@ -21,7 +21,7 @@ export default NextAuth({
         // You can use the tokens, in case you want to fetch more profile information
         // For example several OAuth providers do not return email by default.
         // Depending on your provider, will have tokens like `access_token`, `id_token` and or `refresh_token`
-
+        console.log(profile, tokens);
         return {
           id: profile.data.gid,
           name: profile.data?.name,
@@ -36,6 +36,7 @@ export default NextAuth({
   pages: {
     signIn: "/signin",
   },
+
   callbacks: {
     /**
      * @param  {object}  token     Decrypted JSON Web Token
@@ -47,6 +48,7 @@ export default NextAuth({
      */
 
     async jwt(token, user, account, profile, isNewUser) {
+      console.log(account, token);
       // Add access_token to the token right after signin
       if (account?.accessToken) {
         token.accessToken = account.accessToken;
@@ -62,9 +64,41 @@ export default NextAuth({
      */
 
     async session(session, token) {
+      console.log(session, token);
       // Add access_token to session
       session.accessToken = token.accessToken;
       return session;
     },
   },
+  useSecureCookies: true,
 });
+// session: { jwt: true },
+//   jwt: {
+//     // A secret to use for key generation - you should set this explicitly
+//     // Defaults to NextAuth.js secret if not explicitly specified.
+//     // This is used to generate the actual signingKey and produces a warning
+//     // message if not defined explicitly.
+//     secret: "INp8IvdIyeMcoGAgFGoA61DdBglwwSqnXJZkgz8PSnw",
+//     // You can generate a signing key using `jose newkey -s 512 -t oct -a HS512`
+//     // This gives you direct knowledge of the key used to sign the token so you can use it
+//     // to authenticate indirectly (eg. to a database driver)
+//     signingKey: {
+//       kty: "oct",
+//       kid: "Dl893BEV-iVE-x9EC52TDmlJUgGm9oZ99_ZL025Hc5Q",
+//       alg: "HS512",
+//       k: "K7QqRmJOKRK2qcCKV_pi9PSBv3XP0fpTu30TP8xn4w01xR3ZMZM38yL2DnTVPVw6e4yhdh0jtoah-i4c_pZagA",
+//     },
+//     // If you chose something other than the default algorithm for the signingKey (HS512)
+//     // you also need to configure the algorithm
+//     verificationOptions: {
+//       algorithms: ["HS256"],
+//     },
+//     secureCookie: true,
+//     // Set to true to use encryption. Defaults to false (signing only).
+//     encryption: true,
+//     encryptionKey: process.env.NEXT_ENCRYPTION_KEY,
+//     // decryptionKey: encryptionKey,
+//     decryptionOptions: {
+//       algorithms: ["A256GCM"],
+//     },
+//   },
