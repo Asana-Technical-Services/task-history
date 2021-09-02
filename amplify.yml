@@ -1,0 +1,25 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - "# Execute Amplify CLI with the helper script"
+        - amplifyPush --simple
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - npm run build
+        - echo "NEXT_CLIENT_ID=$NEXT_CLIENT_ID" >> .env
+        - echo "NEXT_CLIENT_SECRET=$NEXT_CLIENT_SECRET" >> .env
+        - echo "NEXT_ENCRYPTION_KEY=$NEXT_ENCRYPTION_KEY" >> .env
+  artifacts:
+    baseDirectory: .next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*

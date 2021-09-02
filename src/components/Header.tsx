@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/client";
 
-export function Login() {
+export function Header() {
   const [session, loading] = useSession();
 
   return (

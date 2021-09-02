@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.21.1",
+    "cryptr": "^6.0.2",
     "lodash": "^4.17.21",
     "next": "^11.1.0",
     "next-auth": "^3.28.0",

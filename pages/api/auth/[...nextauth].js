@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
-import Providers from "next-auth/providers";
-import axios from "axios";
+import SecretsManager from "aws-";
+import Cryptr from "cryptr";
 
 export default NextAuth({
   // Configure one or more authentication providers
@@ -21,12 +21,9 @@ export default NextAuth({
         // You can use the tokens, in case you want to fetch more profile information
         // For example several OAuth providers do not return email by default.
         // Depending on your provider, will have tokens like `access_token`, `id_token` and or `refresh_token`
-        console.log(profile, tokens);
         return {
           id: profile.data.gid,
           name: profile.data?.name,
-          email: profile.data?.email,
-          image: profile.data?.photo?.image_128x128,
         };
       },
       clientId: process.env.NEXT_CLIENT_ID,
@@ -48,10 +45,16 @@ export default NextAuth({
      */
 
     async jwt(token, user, account, profile, isNewUser) {
-      console.log(account, token);
       // Add access_token to the token right after signin
       if (account?.accessToken) {
-        token.accessToken = account.accessToken;
+        const cryptr = new Cryptr(process.env.NEXT_ENCRYPTION_KEY);
+        token.accessToken = cryptr.encrypt(account.accessToken);
+      }
+      // Also encrypt firstname for fun
+      console.log(account);
+      if (account?.data?.name) {
+        const cryptr = new Cryptr(process.env.NEXT_ENCRYPTION_KEY);
+        token.name = cryptr.encrypt(account.data.name);
       }
       return token;
     },
@@ -64,13 +67,15 @@ export default NextAuth({
      */
 
     async session(session, token) {
-      console.log(session, token);
       // Add access_token to session
-      session.accessToken = token.accessToken;
+      const cryptr = new Cryptr(process.env.NEXT_ENCRYPTION_KEY);
+      session.accessToken = cryptr.decrypt(token.accessToken);
+      session.user.name = cryptr.decrypt(token.name);
       return session;
     },
   },
   useSecureCookies: true,
+  session: { jwt: true },
 });
 // session: { jwt: true },
 //   jwt: {
