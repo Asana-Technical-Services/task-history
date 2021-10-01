@@ -1,72 +1,36 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
-import { getProviders, useSession, signIn, providers } from "next-auth/client";
+import { getProviders, useSession, signIn } from "next-auth/react";
 
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-content: center;
-  border: red 2px solid;
-  background: rgb(255, 171, 100);
-  background: linear-gradient(
-    186deg,
-    rgba(255, 171, 100, 1) 0%,
-    rgba(246, 72, 141, 1) 100%
-  );
-`;
-
-const SignInBox = styled.div`
-  margin: auto;
-  align-self: center;
-  text-align: center;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 0.5rem;
-`;
-
-const ConnectButton = styled.button`
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-
-  padding: 5px 10px;
-`;
-
-const FinePrint = styled.p`
-  text-align: center;
-  font-size: 0.7rem;
-`;
 
 export default function SignIn({}) {
-  const [session, loadingsession] = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
-      router.replace("/");
+    if (session?.user) {
+      router.replace("/home");
     }
   }, [session]);
 
   return (
-    <Container>
-      <SignInBox>
+    <div className="container asana-gradient">
+      <div className="signin-box">
+        <span className="emoji-logo">🕰</span>
         <h2>Task History Tool</h2>
         <div>
-          <ConnectButton onClick={() => signIn("asana")}>
+          <button
+            className="connect-button"
+            onClick={() =>
+              signIn("asana", { callbackUrl: "http://localhost:3000/home" })
+            }
+          >
             Connect with Asana
-          </ConnectButton>
+          </button>
         </div>
-        <FinePrint>this will redirect you to Asana to verify the app</FinePrint>
-      </SignInBox>
-    </Container>
+        <p>this will redirect you to Asana to verify the app</p>
+      </div>
+    </div>
   );
-}
-
-// This is the recommended way for Next.js 9.3 or newer
-export async function getServerSideProps() {
-  const providers = await getProviders();
-  return {
-    props: { providers },
-  };
 }

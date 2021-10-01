@@ -1,23 +1,39 @@
-import { useEffect, useState } from "react";
-import { signIn, signOut, useSession } from "next-auth/client";
+import { signIn, signOut, useSession } from "next-auth/react";
+import styled from "styled-components";
+import Image from "next/image";
+import { profile } from "console";
 
 export function Header() {
-  const [session, loading] = useSession();
+  const { data: session } = useSession();
+  console.log(session);
 
   return (
-    <div>
-      {!session && (
-        <div>
-          Not signed in <br />
-          <button onClick={() => signIn()}>Connect to Asana</button>
-        </div>
-      )}
-      {session && (
-        <div>
-          Signed in as {session.user?.name} <br />
-          <button onClick={() => signOut()}>Sign out</button>
-        </div>
-      )}
+    <div className="header-wrapper">
+      <div className="head-title">
+        <h2>🕰 Task History</h2>
+      </div>
+      <div className="head-info">
+        {!session && (
+          <div>
+            <button onClick={() => signIn()}>Sign In</button>
+          </div>
+        )}
+        {session && (
+          <div className="head-profile">
+            <img
+              className="profile-image"
+              src={
+                session?.user?.image ||
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Question_mark_%28black%29.svg/200px-Question_mark_%28black%29.svg.png"
+              }
+            ></img>
+            <p className="profile-name">{session.user?.name}</p>
+            <button onClick={() => signOut({ callbackUrl: "/" })}>
+              Sign out
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

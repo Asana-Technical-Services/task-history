@@ -28,6 +28,7 @@ package-lock.json
 
 #next
 .next
+certificates
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend

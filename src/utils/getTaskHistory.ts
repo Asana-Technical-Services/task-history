@@ -1,4 +1,6 @@
 import axios from "axios";
+const ASANA_URL = "https://app.asana.com/api/1.0/";
+
 const cloneDeep = require("lodash/cloneDeep");
 export const STORY_TYPES = [
   "due_date_changed",
@@ -22,6 +24,7 @@ export const getTaskHistory = async (id: string, accessToken: string) => {
 
     return { stories, taskHistory };
   } catch (err) {
+    console.log("error!");
     return { stories: [], taskHistory: new Map() };
   }
 };
@@ -51,8 +54,6 @@ const taskHistoryFromStories = async (
 };
 
 const getTask = async (taskId: string, accessToken: string) => {
-  const ASANA_URL = "https://app.asana.com/api/1.0/";
-
   const client = axios.create({
     baseURL: ASANA_URL,
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -65,7 +66,9 @@ const getTask = async (taskId: string, accessToken: string) => {
     console.log(taskResponse.data.data);
     return taskResponse.data.data;
   } catch (err) {
-    console.log(err);
+    if (err) {
+    }
+    console.log("error message", err);
     return {};
   }
 };
@@ -74,8 +77,6 @@ const getAllStories = async (
   taskId: string,
   accessToken: string
 ): Promise<Array<any>> => {
-  const ASANA_URL = "https://app.asana.com/api/1.0/";
-
   const client = axios.create({
     baseURL: ASANA_URL,
     headers: { Authorization: `Bearer ${accessToken}` },

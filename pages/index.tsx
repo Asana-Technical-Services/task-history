@@ -1,36 +1,49 @@
 import type { NextPage } from "next";
 import { useEffect } from "react";
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
-import { useSession } from "next-auth/client";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import TaskForm from "../src/components/TaskForm";
-import withAuth from "../src/components/withAuth";
+import { Header } from "../src/components/Header";
+import logo from "./../public/logo512.png";
+import Image from "next/image";
 
-const Home: NextPage = () => {
-  const [session, sessionLoading] = useSession();
+const LandingPage: NextPage = () => {
+  const { data: session } = useSession();
   const router = useRouter();
 
-  const handleTaskIdChange = async (id: string) => {
-    if (id === "") {
-    } else {
-      router.push(`/task/${id}`);
+  useEffect(() => {
+    if (session) {
+      router.replace("/home");
     }
-  };
+  }, [session]);
 
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Task History</title>
-        <meta name="description" content="Asana Task History Tool" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <TaskForm setTaskId={handleTaskIdChange} />
-      </main>
+    <div className="container flex-col">
+      <Header />
+      <div className="splash-container">
+        <div className="splash-image">
+          <div> task history images</div>
+          <Image src={logo} />
+        </div>
+        <div className="splash-desc">
+          <div>
+            <h2>Task History</h2>
+            <p>
+              the task history tool allows you to roll back edits to view a task
+              as it existed during diffent periods of time
+            </p>
+            <p>sign in with asana to get started viewing your tasks:</p>
+            <button
+              onClick={() => {
+                signIn();
+              }}
+            >
+              Sign in with Asana
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default withAuth(Home);
+export default LandingPage;

@@ -16,6 +16,7 @@ frontend:
         - echo "NEXT_CLIENT_ID=$NEXT_CLIENT_ID" >> .env
         - echo "NEXT_CLIENT_SECRET=$NEXT_CLIENT_SECRET" >> .env
         - echo "NEXT_ENCRYPTION_KEY=$NEXT_ENCRYPTION_KEY" >> .env
+        - echo "NEXTAUTH_URL=$NEXTAUTH_URL" >> .env
   artifacts:
     baseDirectory: .next
     files:

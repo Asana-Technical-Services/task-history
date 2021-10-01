@@ -1,12 +1,12 @@
 import type { NextPage } from "next";
-import withAuth from "../../src/components/withAuth";
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getTaskHistory } from "../../src/utils/getTaskHistory";
 import TaskDisplay from "../../src/components/TaskDisplay";
 import Timeline from "../../src/components/Timeline";
 import styled from "styled-components";
+import { Header } from "../../src/components/Header";
 
 const TaskHistoryWrapper = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ const TaskHistoryWrapper = styled.div`
   align-items: stretch;
 `;
 
-const Task: NextPage = () => {
+const Task: NextPage & { auth: boolean } = () => {
   const router = useRouter();
   const { taskId } = router.query;
   const [stories, setStories] = useState([{}]);
@@ -23,22 +23,22 @@ const Task: NextPage = () => {
   const [taskHistory, setTaskHistory] = useState(new Map());
   const [latestDate, setLatestDate] = useState("today");
   const [loading, setLoading] = useState(true);
-  const [session, _] = useSession();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (typeof taskId !== "string" || taskId === "") {
       router.replace("/");
     } else {
       setLoading(true);
-      if (typeof session?.accessToken === "string") {
-        getTaskHistory(taskId, session.accessToken).then((newData) => {
+      if (typeof session?.access_token === "string") {
+        getTaskHistory(taskId, session.access_token).then((newData) => {
           if (newData?.taskHistory && newData?.stories?.length) {
             setStories(newData.stories);
             setTaskHistory(newData.taskHistory);
             setCurrentTaskData(newData.taskHistory.get("today"));
             setLoading(false);
           } else {
-            router.replace("/");
+            console.log("error!");
           }
         });
       } else setLoading(false);
@@ -59,25 +59,31 @@ const Task: NextPage = () => {
   };
 
   const backButtonHandler = () => {
-    router.push("/");
+    router.push("/home");
   };
 
-  if (loading) return <div>loading...</div>;
-
   return (
-    <TaskHistoryWrapper>
-      <TaskDisplay
-        currentTaskData={currentTaskData}
-        latestDate={latestDate}
-        backFunction={backButtonHandler}
-      />
-      <Timeline
-        currentStoryGid={currentStoryGid}
-        selectNewStory={setCurrentStoryHandler}
-        stories={stories}
-      />
-    </TaskHistoryWrapper>
+    <div className="container flex-col">
+      <Header />
+      {loading ? (
+        <div>loading...</div>
+      ) : (
+        <div className="flex-stretch">
+          <TaskDisplay
+            currentTaskData={currentTaskData}
+            latestDate={latestDate}
+            backFunction={backButtonHandler}
+          />
+          <Timeline
+            currentStoryGid={currentStoryGid}
+            selectNewStory={setCurrentStoryHandler}
+            stories={stories}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 
-export default withAuth(Task);
+Task.auth = true;
+export default Task;

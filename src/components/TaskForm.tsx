@@ -1,5 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
+import howToGetLink from "./../../public/HowToCopyTask.png";
+import Image from "next/image";
 
 const TaskFormWrapper = styled.div`
   align-content: center;
@@ -31,12 +33,20 @@ function TaskForm(props: TaskFormProps) {
   return (
     <TaskFormWrapper>
       <p>reference tasks: 1200538057511646 , 1200186779257471</p>
-      <h2>Input your task Id, or a link to task:</h2>
+      <h2>Paste a link to a task:</h2>
       <input
         value={taskIdInput}
         onChange={(e) => setTaskIdInput(e.target.value)}
       ></input>
       <button onClick={handleSubmit}>Get task history</button>
+      <details>
+        <summary>Help</summary>
+        <Image
+          src={howToGetLink}
+          alt="click the copy link button from the task's expanded view"
+        />
+        <p></p>
+      </details>
     </TaskFormWrapper>
   );
 }
