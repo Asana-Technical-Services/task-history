@@ -109,13 +109,17 @@ a {
 
 .head-title {
   text-align: left;
-  grid-column: 2 / 4;
+  grid-column: 2 / 9;
 }
 
 .head-info {
-  text-align: left;
+  border: 1px solid salmon;
+  align-content: right;
+  text-align: right;
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
   grid-column: 9 / 12;
-  margin: auto;
 }
 
 /* Splash Page*/

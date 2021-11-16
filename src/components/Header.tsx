@@ -13,12 +13,7 @@ export function Header() {
         <h2>🕰 Task History</h2>
       </div>
       <div className="head-info">
-        {!session && (
-          <div>
-            <button onClick={() => signIn()}>Sign In</button>
-          </div>
-        )}
-        {session && (
+        {session ? (
           <div className="head-profile">
             <img
               className="profile-image"
@@ -31,6 +26,10 @@ export function Header() {
             <button onClick={() => signOut({ callbackUrl: "/" })}>
               Sign out
             </button>
+          </div>
+        ) : (
+          <div className="head-signin">
+            <button onClick={() => signIn()}>Sign In</button>
           </div>
         )}
       </div>
