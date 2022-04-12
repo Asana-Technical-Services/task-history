@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { Header } from "../src/components/Header";
-import logo from "./../public/logo512.png";
+import timeMachineImage from "./../public/time-machine.png";
 import Image from "next/image";
 
 const LandingPage: NextPage = () => {
@@ -21,8 +21,7 @@ const LandingPage: NextPage = () => {
       <Header />
       <div className="splash-container">
         <div className="splash-image">
-          <div> task history images</div>
-          <Image src={logo} />
+          <Image src={timeMachineImage} />
         </div>
         <div className="splash-desc">
           <div>
